@@ -27,14 +27,17 @@ jobs:
       - name: Install dependencies
         run: npm ci || npm install
 
-      - name: Type check
-        run: npx tsc --noEmit
+      - name: Lint
+        run: npm run lint
 
-      - name: Build
-        run: npm run build
+      - name: Run tests
+        run: npm test -- --run
 
-      - name: Run doctests
-        run: npm test
+      - name: Run coverage
+        run: npm run test:coverage || true
+
+      - name: Build library
+        run: npm run build:lib
 
       - name: Pack package
         id: pack
@@ -49,7 +52,7 @@ jobs:
       - name: Sign package
         run: |
           echo "Signing ${{ steps.pack.outputs.tarball }}"
-          node -e "const { sign } = require('@sigstore/sign'); const fs = require('fs'); (async () => { const bundle = await sign(fs.readFileSync('${{ steps.pack.outputs.tarball }}')); fs.writeFileSync('${{ steps.pack.outputs.tarball }}.sig.json', JSON.stringify(bundle)); })();"
+          node scripts/sign-package.js "${{ steps.pack.outputs.tarball }}"
         continue-on-error: false
 
       - name: Upload signed artifact

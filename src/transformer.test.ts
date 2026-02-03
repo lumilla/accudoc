@@ -12,9 +12,7 @@ describe('transformer', () => {
 
     const result = await transformCode(code, false, config);
 
-    expect(result).toContain(
-      `const { defineConfig } = await import('./dist/index.js')`
-    );
+    expect(result).toContain(`const { defineConfig } = await import('./dist/index.js')`);
     expect(result).not.toContain(`import { defineConfig }`);
   });
 
@@ -28,9 +26,7 @@ describe('transformer', () => {
 
     const result = await transformCode(code, false, config);
 
-    expect(result).toContain(
-      `const { default: Config } = await import('./dist/config.js')`
-    );
+    expect(result).toContain(`const { default: Config } = await import('./dist/config.js')`);
   });
 
   it('transforms namespace import correctly', async () => {
@@ -83,9 +79,7 @@ describe('transformer', () => {
 
     const result = await transformCode(code, false, config);
 
-    expect(result).toContain(
-      `const { foo, bar, baz } = await import('./dist/lib.js')`
-    );
+    expect(result).toContain(`const { foo, bar, baz } = await import('./dist/lib.js')`);
   });
 
   it('mocks React hooks when present', async () => {
@@ -122,8 +116,6 @@ describe('transformer', () => {
 
     const result = await transformCode(code, false, config);
 
-    expect(result).toContain(
-      `const { foo } = await import('./dist/lib.js')`
-    );
+    expect(result).toContain(`const { foo } = await import('./dist/lib.js')`);
   });
 });
