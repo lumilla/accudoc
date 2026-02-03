@@ -11,6 +11,7 @@ import type {
 import { extractDoctests } from './extractor.js';
 import { transformCode } from './transformer.js';
 import { createDomEnvironment, applyEnvironment } from './environment.js';
+import * as assertions from './assert.js';
 
 /**
  * Find all markdown files in a directory recursively
@@ -45,19 +46,35 @@ export async function runDoctest(
   try {
     const transformedCode = await transformCode(doctest.code, doctest.isTsx, config);
 
-    // Create async wrapper function
-    const wrappedCode = `
-      (async () => {
-        ${transformedCode}
-      })()
-    `;
-
     // Apply environment to global scope
     applyEnvironment(env);
 
-    // Execute the code
-    const fn = new Function(`return ${wrappedCode}`);
-    await fn();
+    // Create async wrapper function with assertions and environment injected
+    // Pass assertions and environment as parameters to avoid scope issues
+    const wrappedCode = `
+      return (async function(assert, assertEqual, assertDeepEqual, assertNotEqual, assertThrows, assertThrowsAsync, assertNullish, assertTruthy, assertFalsy, assertInstanceOf, assertMatch, assertIncludes, AssertionError) {
+        ${transformedCode}
+      })(...arguments)
+    `;
+
+    // Execute the code with assertions passed as arguments
+    const fn = new Function(wrappedCode);
+    await fn.call(
+      env,
+      assertions.assert,
+      assertions.assertEqual,
+      assertions.assertDeepEqual,
+      assertions.assertNotEqual,
+      assertions.assertThrows,
+      assertions.assertThrowsAsync,
+      assertions.assertNullish,
+      assertions.assertTruthy,
+      assertions.assertFalsy,
+      assertions.assertInstanceOf,
+      assertions.assertMatch,
+      assertions.assertIncludes,
+      assertions.AssertionError
+    );
 
     return { success: true };
   } catch (error) {

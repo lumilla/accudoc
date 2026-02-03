@@ -1,13 +1,13 @@
 /**
  * VitePress integration for Accudoc
  *
- * Provides utilities for stripping doctest-hidden lines from rendered documentation.
+ * Provides utilities for stripping doctest-hidden lines and assertions from rendered documentation.
  */
 
-import { stripHiddenLines } from './extractor.js';
+import { stripHiddenLines, stripAssertions } from './extractor.js';
 
 /**
- * VitePress markdown code transformer that strips doctest-hidden lines
+ * VitePress markdown code transformer that strips doctest-hidden lines and optionally assertions
  *
  * @example
  * ```ts
@@ -23,7 +23,10 @@ import { stripHiddenLines } from './extractor.js';
  */
 export const accudocTransformer = {
   preprocess(code: string): string {
-    return stripHiddenLines(code);
+    // First strip hidden lines, then strip assertions
+    let result = stripHiddenLines(code);
+    result = stripAssertions(result);
+    return result;
   },
 };
 
@@ -31,4 +34,4 @@ export const accudocTransformer = {
  * Strip doctest-hidden lines from code
  * Re-exported for convenience
  */
-export { stripHiddenLines };
+export { stripHiddenLines, stripAssertions };

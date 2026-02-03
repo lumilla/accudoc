@@ -56,3 +56,36 @@ export function stripHiddenLines(code: string): string {
     .filter((line) => !line.match(/\/\/\s*(doctest-hidden|doctest-only)\s*$/))
     .join('\n');
 }
+
+/**
+ * Strip assertion function calls from code
+ * Removes lines that are pure assertion calls (not assignments)
+ * Use `// doctest-show` to force-show a specific assertion
+ */
+export function stripAssertions(code: string): string {
+  return code
+    .split('\n')
+    .filter((line) => {
+      // Keep lines with doctest-show comment
+      if (line.match(/\/\/\s*doctest-show\s*$/)) {
+        return true;
+      }
+
+      const trimmed = line.trim();
+
+      // Remove lines that are pure assertion calls
+      const assertionPattern =
+        /^(assert|assertEqual|assertDeepEqual|assertNotEqual|assertThrows|assertThrowsAsync|assertNullish|assertTruthy|assertFalsy|assertInstanceOf|assertMatch|assertIncludes)\s*\(/;
+
+      if (assertionPattern.test(trimmed)) {
+        return false;
+      }
+
+      return true;
+    })
+    .map((line) => {
+      // Remove doctest-show comments from output
+      return line.replace(/\s*\/\/\s*doctest-show\s*$/, '');
+    })
+    .join('\n');
+}

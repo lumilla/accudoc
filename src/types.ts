@@ -55,6 +55,14 @@ export interface AccudocConfig {
    * @default false
    */
   verbose?: boolean;
+
+  /**
+   * Strip assertion function calls from rendered documentation
+   * Assertions are still executed in tests but hidden from docs
+   * Use `// doctest-show` comment to force-show specific assertions
+   * @default true
+   */
+  stripAssertions?: boolean;
 }
 
 /**

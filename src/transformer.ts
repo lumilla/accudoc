@@ -1,4 +1,5 @@
 import { transform } from 'oxc-transform';
+import { resolve } from 'path';
 import type { AccudocConfig } from './types.js';
 
 /**
@@ -27,29 +28,40 @@ export async function transformCode(
         '// import removed\n'
       );
     } else {
+      // Resolve to absolute path if it's a relative path
+      const resolvedPath = replacement.startsWith('.')
+        ? resolve(process.cwd(), replacement)
+        : replacement;
+
+      // Convert to file:// URL on Windows to handle absolute paths correctly
+      const importPath =
+        resolvedPath.match(/^[a-zA-Z]:/) || resolvedPath.startsWith('/')
+          ? `file:///${resolvedPath.replace(/\\/g, '/')}`
+          : resolvedPath;
+
       // Convert static imports to dynamic imports
       // Handle: import { Foo, Bar } from 'pkg' -> const { Foo, Bar } = await import('path')
       code = code.replace(
         new RegExp(`import\\s+\\{([^}]+)\\}\\s+from\\s+['"]${escapedSpecifier}['"];?`, 'g'),
-        `const {$1} = await import('${replacement}')`
+        `const {$1} = await import('${importPath}')`
       );
 
       // Handle: import Foo from 'pkg' -> const { default: Foo } = await import('path')
       code = code.replace(
         new RegExp(`import\\s+(\\w+)\\s+from\\s+['"]${escapedSpecifier}['"];?`, 'g'),
-        `const { default: $1 } = await import('${replacement}')`
+        `const { default: $1 } = await import('${importPath}')`
       );
 
       // Handle: import * as Foo from 'pkg' -> const Foo = await import('path')
       code = code.replace(
         new RegExp(`import\\s+\\*\\s+as\\s+(\\w+)\\s+from\\s+['"]${escapedSpecifier}['"];?`, 'g'),
-        `const $1 = await import('${replacement}')`
+        `const $1 = await import('${importPath}')`
       );
 
       // Handle dynamic imports: import('pkg') -> import('path')
       code = code.replace(
         new RegExp(`import\\s*\\(\\s*['"]${escapedSpecifier}['"]\\s*\\)`, 'g'),
-        `import('${replacement}')`
+        `import('${importPath}')`
       );
     }
   }

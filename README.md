@@ -28,7 +28,7 @@ Add `doctest` after the language tag in your markdown:
 import { defineConfig } from 'accudoc';
 
 const config = defineConfig({ docs: './docs' });
-console.assert(config.docs === './docs');
+assert(config.docs === './docs');
 ```
 ````
 
@@ -66,6 +66,7 @@ interface AccudocConfig {
   include?: string[];                      // File patterns to include (default: ['**/*.md'])
   exclude?: string[];                      // File patterns to exclude (default: ['node_modules/**'])
   verbose?: boolean;                       // Show detailed output (default: false)
+  stripAssertions?: boolean;               // Strip assertion calls from docs (default: true)
 }
 ```
 
@@ -99,20 +100,94 @@ export default defineConfig({
 
 Add assertions that run in tests but don't appear in rendered documentation:
 
-````markdown
+By default, all assertion function calls are automatically stripped from rendered documentation while still being executed during tests. This keeps your docs clean and focused on the actual code examples.
+
 ```javascript doctest
 import { defineConfig } from 'accudoc';
 
 const config = defineConfig({ docs: './docs', jsx: 'react' });
 console.log(config.docs); // Output: ./docs
 
-// These lines are hidden in docs but run in tests:
-console.assert(config.docs === './docs'); // doctest-hidden
-console.assert(config.jsx === 'react'); // doctest-only
+// These assertions are hidden in rendered docs but run in tests:
+assert(config.docs === './docs');
+assert(config.jsx === 'react');
+```
+
+To force-show an assertion in the rendered documentation, add a `// doctest-show` comment:
+
+```javascript doctest
+const result = 1 + 1;
+console.log(result); // Output: 2
+assertEqual(result, 2); // doctest-show
+```
+
+In rendered docs, this will display:
+```javascript
+const result = 1 + 1;
+console.log(result); // Output: 2
+assertEqual(result, 2);
+```
+
+You can also hide other lines without showing assertions by using `// doctest-hidden`:
+
+````markdown
+```javascript doctest
+const secret = 'hidden value';
+console.log('visible output');
+console.log(secret); // doctest-hidden
 ```
 ````
 
 Lines ending with `// doctest-hidden` or `// doctest-only` are executed during tests but stripped from rendered documentation.
+
+### Controlling Assertion Stripping
+
+Configure assertion stripping in your config file:
+
+```js
+// accudoc.config.js
+import { defineConfig } from 'accudoc';
+
+export default defineConfig({
+  docs: './docs',
+  stripAssertions: true, // Strip all assertions by default (default: true)
+});
+```
+
+When `stripAssertions` is `false`, all assertion calls will be shown in rendered documentation.
+
+### Assertion API
+
+Accudoc provides a comprehensive assertion API that throws errors on failure, ensuring your doctests actually catch bugs:
+
+```javascript doctest
+// Basic assertion
+assert(true, 'This passes');
+
+// Equality checks
+assertEqual(1 + 1, 2);
+assertEqual('hello', 'hello');
+
+// Deep equality for objects and arrays
+assertDeepEqual({ a: 1, b: 2 }, { a: 1, b: 2 });
+assertDeepEqual([1, 2, 3], [1, 2, 3]);
+```
+
+Available assertion functions:
+- `assert(value, message?)` - Assert value is truthy
+- `assertEqual(actual, expected, message?)` - Strict equality (===)
+- `assertDeepEqual(actual, expected, message?)` - Deep equality for objects/arrays
+- `assertNotEqual(actual, expected, message?)` - Values are not equal
+- `assertThrows(fn, ErrorType?, message?)` - Function throws an error
+- `assertThrowsAsync(fn, ErrorType?, message?)` - Async function throws
+- `assertNullish(value, message?)` - Value is null or undefined
+- `assertTruthy(value, message?)` - Value is truthy
+- `assertFalsy(value, message?)` - Value is falsy
+- `assertInstanceOf(value, Type, message?)` - Value is instance of Type
+- `assertMatch(string, regex, message?)` - String matches regex
+- `assertIncludes(array, value, message?)` - Array includes value
+
+All assertion functions are automatically available in your doctests without importing them.
 
 ### Programmatic API
 

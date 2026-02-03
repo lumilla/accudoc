@@ -12,8 +12,9 @@ describe('transformer', () => {
 
     const result = await transformCode(code, false, config);
 
-    expect(result).toContain(`const { defineConfig } = await import('./dist/index.js')`);
-    expect(result).not.toContain(`import { defineConfig }`);
+    expect(result).toContain("const { defineConfig } = await import('file:///");
+    expect(result).toContain("/dist/index.js')");
+    expect(result).not.toContain("import { defineConfig }");
   });
 
   it('transforms default import correctly', async () => {
@@ -26,7 +27,8 @@ describe('transformer', () => {
 
     const result = await transformCode(code, false, config);
 
-    expect(result).toContain(`const { default: Config } = await import('./dist/config.js')`);
+    expect(result).toContain("const { default: Config } = await import('file:///");
+    expect(result).toContain("/dist/config.js')");
   });
 
   it('transforms namespace import correctly', async () => {
@@ -39,7 +41,8 @@ describe('transformer', () => {
 
     const result = await transformCode(code, false, config);
 
-    expect(result).toContain(`const utils = await import('./dist/utils.js')`);
+    expect(result).toContain("const utils = await import('file:///");
+    expect(result).toContain("/dist/utils.js')");
   });
 
   it('removes imports marked with null replacement', async () => {
@@ -66,7 +69,8 @@ describe('transformer', () => {
 
     const result = await transformCode(code, false, config);
 
-    expect(result).toContain(`import('./dist/pkg.js')`);
+    expect(result).toContain("import('file:///");
+    expect(result).toContain("/dist/pkg.js')");
   });
 
   it('handles multiple imports from same package', async () => {
@@ -79,7 +83,8 @@ describe('transformer', () => {
 
     const result = await transformCode(code, false, config);
 
-    expect(result).toContain(`const { foo, bar, baz } = await import('./dist/lib.js')`);
+    expect(result).toContain("const { foo, bar, baz } = await import('file:///");
+    expect(result).toContain("/dist/lib.js')");
   });
 
   it('mocks React hooks when present', async () => {
@@ -116,6 +121,7 @@ describe('transformer', () => {
 
     const result = await transformCode(code, false, config);
 
-    expect(result).toContain(`const { foo } = await import('./dist/lib.js')`);
+    expect(result).toContain("const { foo } = await import('file:///");
+    expect(result).toContain("/dist/lib.js')");
   });
 });
