@@ -25,8 +25,7 @@ export function assert(value: unknown, message?: string): asserts value {
 export function assertEqual<T>(actual: T, expected: T, message?: string): void {
   if (actual !== expected) {
     throw new AssertionError(
-      message ||
-        `Expected ${JSON.stringify(expected)}, but got ${JSON.stringify(actual)}`
+      message || `Expected ${JSON.stringify(expected)}, but got ${JSON.stringify(actual)}`
     );
   }
 }
@@ -37,8 +36,7 @@ export function assertEqual<T>(actual: T, expected: T, message?: string): void {
 export function assertDeepEqual(actual: unknown, expected: unknown, message?: string): void {
   if (!deepEqual(actual, expected)) {
     throw new AssertionError(
-      message ||
-        `Expected ${JSON.stringify(expected)}, but got ${JSON.stringify(actual)}`
+      message || `Expected ${JSON.stringify(expected)}, but got ${JSON.stringify(actual)}`
     );
   }
 }

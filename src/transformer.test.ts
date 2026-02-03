@@ -14,7 +14,7 @@ describe('transformer', () => {
 
     expect(result).toContain("const { defineConfig } = await import('file:///");
     expect(result).toContain("/dist/index.js')");
-    expect(result).not.toContain("import { defineConfig }");
+    expect(result).not.toContain('import { defineConfig }');
   });
 
   it('transforms default import correctly', async () => {
