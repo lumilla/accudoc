@@ -1,6 +1,6 @@
 {
   "name": "accudoc",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Accurate Documentation - doctests for JavaScript/TypeScript markdown",
   "type": "module",
   "main": "dist/index.js",
